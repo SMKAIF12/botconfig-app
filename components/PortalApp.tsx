@@ -2,7 +2,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FilePen } from "lucide-react";
-import type { BotRow } from "@/lib/bots";
+import { CLIENTS, type BotRow } from "@/lib/bots";
 import { STEPS, stepMeta } from "@/lib/constants";
 import { clearDraft, loadDraft, timeAgo, type Draft } from "@/lib/draft";
 import { APP_TOUR } from "@/lib/tours";
@@ -15,6 +15,7 @@ import PortalShell from "./shell/PortalShell";
 // The wizard generates a random Bot ID, so render it on the client only to avoid hydration mismatches.
 const BotWizard = dynamic(() => import("./BotWizard"), { ssr: false, loading: () => null });
 
+interface DupAsk { bot: BotRow; client: string; from: "list" | "detail" }
 interface ToastAction { label: string; run: () => void; done: string }
 
 type Screen =
@@ -27,6 +28,10 @@ export default function PortalApp() {
   const [listState, setListState] = useState<ListState>("data");
   const [removed, setRemoved] = useState<string[]>([]);
   const [confirm, setConfirm] = useState<BotRow | null>(null);
+  const [dupAsk, setDupAskState] = useState<DupAsk | null>(null);
+  const [dupClient, setDupClient] = useState("");
+  // Always start the picker empty so the client is a deliberate choice.
+  const setDupAsk = (v: DupAsk | null) => { setDupClient(""); setDupAskState(v); };
   const [dark, setDark] = useState(false);
   const [appTour, setAppTour] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -130,7 +135,7 @@ export default function PortalApp() {
           onRemove={remove}
           onAdd={(client) => go({ name: "wizard", mode: "add", client, from: "list" })}
           onEdit={(bot, client) => go({ name: "wizard", mode: "edit", client, bot, from: "list" })}
-          onDuplicate={(bot, client) => go({ name: "wizard", mode: "add", client, dup: bot, from: "list" })}
+          onDuplicate={(bot, client) => setDupAsk({ bot, client, from: "list" })}
           onOpen={(bot, client) => go({ name: "detail", client, bot })}
         />
       </div>
@@ -144,7 +149,7 @@ export default function PortalApp() {
           onBack={backToList}
           onEdit={(step) => go({ name: "wizard", mode: "edit", client: screen.client, bot: screen.bot, step, from: "detail" })}
           onDelete={() => setConfirm(screen.bot)}
-          onDuplicate={() => go({ name: "wizard", mode: "add", client: screen.client, dup: screen.bot, from: "detail" })}
+          onDuplicate={() => setDupAsk({ bot: screen.bot, client: screen.client, from: "detail" })}
         />
       )}
 
@@ -164,6 +169,32 @@ export default function PortalApp() {
         </div>
       )}
 
+      {dupAsk && (
+        <ConfirmDialog
+          title="Duplicate bot"
+          confirmLabel="Continue"
+          confirmDisabled={!dupClient}
+          onConfirm={() => {
+            const client = CLIENTS.find((c) => c.id === dupClient);
+            if (!client) return;
+            go({ name: "wizard", mode: "add", client: client.name, dup: dupAsk.bot, from: dupAsk.from });
+            setDupAsk(null);
+          }}
+          onCancel={() => setDupAsk(null)}
+        >
+          <span style={{ display: "block", padding: "8px 12px", borderRadius: 8, background: "var(--info-soft)" }}>
+            Duplicating <b style={{ color: "var(--fg)" }}>{dupAsk.bot.name}</b>
+            <br />Currently belongs to: <b style={{ color: "var(--fg)" }}>{dupAsk.client}</b>
+          </span>
+          <span style={{ display: "block", marginTop: 12 }}>Choose the client the copy will belong to.</span>
+          <span className="sel" style={{ display: "block", marginTop: 12 }}>
+            <select className="inp" aria-label="Client" value={dupClient} onChange={(e) => setDupClient(e.target.value)}>
+              <option value="">Select a client</option>
+              {CLIENTS.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </span>
+        </ConfirmDialog>
+      )}
       {confirm && (
         <ConfirmDialog title="Delete Bot" confirmLabel="Delete" danger onConfirm={() => remove(confirm)} onCancel={() => setConfirm(null)}>
           Are you sure you want to delete bot <b style={{ color: "var(--fg)" }}>{confirm.name}</b>? You can undo this right after.

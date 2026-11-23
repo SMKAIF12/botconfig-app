@@ -2,7 +2,7 @@
 import ConfirmDialog from "../Modal";
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowDown, ArrowUp, ArrowUpRight, Building2, Copy, ChevronLeft, ChevronRight, Globe, LayoutGrid, Languages as LanguagesIcon, Sparkles, Bot as BotIcon, ListFilter, PenLine, Plus, RefreshCw, Search, Table2, Trash2, X,
+  ArrowDown, ArrowUp, Check, ChevronDown, ArrowUpRight, Building2, Copy, ChevronLeft, ChevronRight, Globe, LayoutGrid, Languages as LanguagesIcon, Sparkles, Bot as BotIcon, ListFilter, PenLine, Plus, RefreshCw, Search, Table2, Trash2, X,
 } from "lucide-react";
 import { BOTS, CLIENTS, ROUTING_LABEL, fmtDate, type BotRow, type Routing } from "@/lib/bots";
 import { langName, tzLabel, typeLabel } from "@/lib/helpers";
@@ -83,6 +83,8 @@ export default function BotsList({ state, onAdd, onEdit, onOpen, onDuplicate, re
   const [refreshing, setRefreshing] = useState(false);
   const [fetching, setFetching] = useState(true);
   const filterRef = useRef<HTMLDivElement>(null);
+  const clientRef = useRef<HTMLDivElement>(null);
+  const [clientOpen, setClientOpen] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const prevPos = useRef<Map<string, { x: number; y: number }>>(new Map());
 
@@ -123,6 +125,15 @@ export default function BotsList({ state, onAdd, onEdit, onOpen, onDuplicate, re
     const t = setTimeout(() => setFetching(false), 900);
     return () => clearTimeout(t);
   }, [clientId]);
+
+  useEffect(() => {
+    if (!clientOpen) return;
+    const away = (e: MouseEvent) => !clientRef.current?.contains(e.target as Node) && setClientOpen(false);
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && setClientOpen(false);
+    document.addEventListener("mousedown", away);
+    document.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("mousedown", away); document.removeEventListener("keydown", esc); };
+  }, [clientOpen]);
 
   useEffect(() => {
     if (!filtersOpen) return;
@@ -198,16 +209,28 @@ export default function BotsList({ state, onAdd, onEdit, onOpen, onDuplicate, re
         <span className="ph-ic"><BotIcon size={18} /></span>
         <div>
           <h1>Bots Management</h1>
-          <p className="ph-sub">Create and manage the bots your clients’ customers chat with.</p>
+          <p className="ph-sub">Bots for <b>{client.name}</b> · {loading ? "loading…" : `${all.length} ${all.length === 1 ? "bot" : "bots"}`}</p>
         </div>
       </div>
 
       {/* toolbar — same controls as the portal's TableToolbar, plus the view switch */}
       <div className="toolbar">
-        <div className="sel tb-client">
-          <select className="inp" aria-label="Select client" value={clientId} onChange={(e) => { setClientId(e.target.value); setPage(0); clearAll(); }}>
-            {CLIENTS.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+        <div className="fwrap" ref={clientRef}>
+          <button type="button" className="btn tbtn client-btn" aria-haspopup="listbox" aria-expanded={clientOpen} onClick={() => setClientOpen((o) => !o)}>
+            <Building2 size={16} /> <span className="cb-name">{client.name}</span> <span className="cb-chg">Change</span> <ChevronDown size={14} />
+          </button>
+          {clientOpen && (
+            <div className="pop client-pop" role="listbox" aria-label="Select client">
+              <div className="lbl">Choose a client</div>
+              {CLIENTS.map((c) => (
+                <button key={c.id} type="button" role="option" aria-selected={c.id === clientId} className={"cl-opt" + (c.id === clientId ? " on" : "")} onClick={() => { setClientOpen(false); if (c.id !== clientId) { setClientId(c.id); setPage(0); clearAll(); } }}>
+                  <span className="cl-n">{c.name}</span>
+                  <small>{(BOTS[c.id] ?? []).filter((x) => !removed.includes(x.botId)).length} bots</small>
+                  {c.id === clientId && <Check size={16} />}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <label className="search">
           <Search size={16} />

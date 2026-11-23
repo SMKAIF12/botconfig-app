@@ -237,6 +237,16 @@ textarea.inp{min-height:110px;resize:vertical;font-family:ui-monospace,Consolas,
 .banner li button{background:none;border:0;padding:0;color:inherit;text-decoration:underline;cursor:pointer;font-size:13px;text-align:left}
 .rsum{flex:none;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .banner{flex:none}
+.rview{display:flex;align-items:center;gap:10px;font-size:13px}
+.rtable{overflow-x:auto}
+.rtable table{width:100%;border-collapse:collapse;font-size:13px}
+.rtable thead th{text-align:left;font-weight:500;color:var(--muted);padding:10px 16px;background:var(--subtle);border-bottom:1px solid var(--line)}
+.rtable td,.rtable tbody th{padding:9px 16px;vertical-align:top;text-align:left;overflow-wrap:anywhere}
+.rtable tbody th{font-weight:500;border-right:1px solid var(--line);min-width:120px}
+.rtable tr.first>*{border-top:1px solid var(--line)}
+.rtable tbody tr.first:first-child>*{border-top:0}
+.rtable td.k{color:var(--muted);white-space:nowrap}
+.rtable td.act{text-align:right;vertical-align:top}
 .rsum.changes .cnt-pill{font-size:12px;padding:1px 8px;border-radius:999px;background:var(--coral-soft);color:var(--coral-text)}
 .chg-empty{padding:14px 16px;font-size:13px;color:var(--muted)}
 .chg{list-style:none;margin:0;padding:6px 16px;font-size:13px}

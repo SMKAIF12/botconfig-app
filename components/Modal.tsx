@@ -10,6 +10,8 @@ interface Props {
   cancelLabel?: string;
   /** Use the danger style for destructive confirmations. */
   danger?: boolean;
+  /** Disable the confirm button until the dialog's own input is valid. */
+  confirmDisabled?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -18,7 +20,7 @@ interface Props {
  * Accessible confirmation dialog (WAI-ARIA APG): focus moves in on open (to the safe button),
  * Tab stays inside, Escape or a click on the backdrop cancels, and focus returns to the opener on close.
  */
-export default function ConfirmDialog({ title, children, confirmLabel, cancelLabel = "Cancel", danger, onConfirm, onCancel }: Props) {
+export default function ConfirmDialog({ title, children, confirmLabel, cancelLabel = "Cancel", danger, confirmDisabled, onConfirm, onCancel }: Props) {
   const id = useId();
   const box = useRef<HTMLDivElement>(null);
   const cancel = useRef(onCancel);
@@ -60,7 +62,7 @@ export default function ConfirmDialog({ title, children, confirmLabel, cancelLab
         <p>{children}</p>
         <div className="acts">
           <button type="button" className="btn" data-autofocus onClick={onCancel}>{cancelLabel}</button>
-          <button type="button" className={`btn ${danger ? "danger" : "primary"}`} onClick={onConfirm}>{confirmLabel}</button>
+          <button type="button" className={`btn ${danger ? "danger" : "primary"}`} disabled={confirmDisabled} onClick={onConfirm}>{confirmLabel}</button>
         </div>
       </div>
     </div>

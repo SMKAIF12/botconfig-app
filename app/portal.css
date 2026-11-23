@@ -629,3 +629,14 @@ textarea.ann-text{font-family:inherit;min-height:80px}
 .page-head{justify-content:flex-start;align-items:center;gap:12px}
 .ph-ic{flex:none;width:40px;height:40px;border-radius:12px;background:var(--coral-soft);color:var(--coral-text);display:grid;place-items:center;box-shadow:0 1px 2px rgba(0,0,0,.05)}
 .ph-sub{font-size:12px;color:var(--muted);margin-top:2px}
+
+.tb-lbl{font-size:13px;font-weight:600;color:var(--muted)}
+.ph-sub b{color:var(--fg)}
+.client-btn{max-width:100%}
+.client-btn .cb-chg{font-size:12px;font-weight:600;color:var(--coral-text)}
+.client-pop{min-width:260px}
+.cl-opt{display:flex;align-items:center;gap:8px;width:100%;padding:9px 10px;border:0;border-radius:8px;background:none;color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+.cl-opt .cl-n{flex:1;font-weight:500}
+.cl-opt small{color:var(--muted)}
+.cl-opt:hover{background:var(--hover)}
+.cl-opt.on{background:var(--coral-soft);color:var(--coral-text)}

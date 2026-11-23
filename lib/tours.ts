@@ -16,7 +16,7 @@ export const WIZARD_TOUR: TourStep[] = [
 
 export const APP_TOUR: TourStep[] = [
   { target: ".sb", side: "right", title: "Navigation", body: "Hover over this sidebar to expand it. Every area of the portal lives here, and you’re currently in EngageAI › Bots, where you manage your clients’ bots." },
-  { target: ".tb-client", side: "bottom", title: "Choose a client", body: "Bots are grouped by client. Pick the client you’re working for to see their bots, or switch to another client." },
+  { target: ".client-btn", side: "bottom", title: "Choose a client", body: "Bots are grouped by client. Pick the client you’re working for to see their bots, or switch to another client." },
   { target: ".search", side: "bottom", title: "Find a bot", body: "Search by name, bot ID, type, industry or timezone. Matching text is highlighted in the results." },
   { target: ".fwrap", side: "bottom", title: "Narrow the list", body: "Use Filters to show only certain bot types or only bots that answer first as Bot or AI Agent." },
   { target: ".view-seg", side: "bottom", title: "Table or cards", body: "Switch views to suit the job. Table is best for comparing and sorting, cards are easier to scan." },

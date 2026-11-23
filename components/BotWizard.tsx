@@ -175,8 +175,14 @@ export default function BotWizard({ initialMode = "add", initialStep = 0, initia
   };
 
   const submit = () => {
-    if (issueKeys().length) {
+    const issues = issueKeys();
+    if (issues.length) {
       toast("Fix the highlighted items first");
+      // Saving from a step other than Review: take the user to the first problem.
+      if (step !== REVIEW) {
+        setAttempted((a) => ({ ...a, [stepOf(issues[0])]: true }));
+        moveTo(stepOf(issues[0]), issues[0]);
+      }
       return;
     }
     setSubmitting(true);
@@ -356,7 +362,15 @@ export default function BotWizard({ initialMode = "add", initialStep = 0, initia
                             {submitting ? <><span className="spin" />{add ? "Adding…" : "Saving…"}</> : <><Check size={15} />{add ? "Add bot" : "Update bot"}</>}
                           </button>
                         ) : (
-                          <button type="button" className="btn primary" onClick={next}>Next <ArrowRight size={15} /></button>
+                          <>
+                            {/* Editing: every step is reachable, so changing one field shouldn't mean walking through the rest. */}
+                            {!add && (
+                              <button type="button" className="btn primary" disabled={submitting || !dirty} title={!dirty ? "Nothing has changed yet" : undefined} onClick={submit}>
+                                {submitting ? <><span className="spin" />Saving…</> : <><Check size={15} />Save changes</>}
+                              </button>
+                            )}
+                            <button type="button" className={`btn${add ? " primary" : ""}`} onClick={next}>Next <ArrowRight size={15} /></button>
+                          </>
                         )}
                       </div>
                     </>

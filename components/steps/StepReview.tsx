@@ -1,5 +1,5 @@
 "use client";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 import { COUNTRIES, stepMeta } from "@/lib/constants";
 import { agentById, expiryText, hoursSummary, storageById, tzLabel, typeLabel } from "@/lib/helpers";
@@ -30,6 +30,39 @@ export default function StepReview() {
   const agent = agentById(d.agentId);
   const storage = storageById(d.storageId);
   const yes = (b: boolean) => (b ? "On" : "Off");
+  const [view, setView] = useState<"card" | "table">("card");
+
+  const sections: { title: string; step: number; rows: [string, ReactNode][] }[] = [
+    { title: "Basics", step: 0, rows: [
+      ["Name", d.name], ["Type", typeLabel(d.botType)], ["Industry", d.industry], ["Timezone", tzLabel(d.timezone)],
+      ["Default country", COUNTRIES.find(([c]) => c === d.defaultCountryCode)?.[1] ?? ""],
+    ] },
+    { title: "Languages & chat", step: 1, rows: [
+      ["Languages", d.languages.map((l) => l.name + (l.code === d.defaultLanguage ? " (default)" : "")).join(", ")],
+      ["Answers first", d.routing === "BOT" ? "Bot" : "AI Agent"],
+      ["Idle chats end after", expiryText(d)],
+      ["Feedback on replies", yes(d.feedback)],
+    ] },
+    d.routing === "BOT"
+      ? { title: "Skills", step: 2, rows: [
+          ["Skills", d.skills.length ? d.skills.map((s) => s.name + (s.enabled ? "" : " (off)")).join(", ") : "None added"],
+        ] }
+      : { title: "AI agent", step: 2, rows: [["Agent", agent?.name ?? "None selected"]] },
+    { title: "Live agent", step: 3, rows: [
+      ["Available", hoursSummary(d.lh.hours)],
+      ["Timezone", tzLabel(d.lh.timezone)],
+      ["Waits up to", `${d.lh.waitMin} min`],
+      ["Live chat length", `${d.lh.modeMin} min`],
+      ["Join / leave messages", `${d.lh.joinMsg ? "Join on" : "Join off"} · ${d.lh.leaveMsg ? "Leave on" : "Leave off"}`],
+    ] },
+    { title: "Plan, storage & advanced", step: 4, rows: [
+      ["Subscription", d.chargebeeId],
+      ["Storage", storage?.name ?? ""],
+      ["CX base URL", d.cxBaseUrl],
+      ["Legacy bot", d.legacyId || d.legacyName ? `${d.legacyName} (${d.legacyId})` : "None"],
+      ["LG templates", d.lg.trim() ? "Added" : "None"],
+    ] },
+  ];
 
   return (
     <>
@@ -78,39 +111,41 @@ export default function StepReview() {
         </div>
       )}
 
-      <Card title="Basics" step={0} rows={[
-        ["Name", d.name], ["Type", typeLabel(d.botType)], ["Industry", d.industry], ["Timezone", tzLabel(d.timezone)],
-        ["Default country", COUNTRIES.find(([c]) => c === d.defaultCountryCode)?.[1] ?? ""],
-      ]} />
-      <Card title="Languages & chat" step={1} rows={[
-        ["Languages", d.languages.map((l) => l.name + (l.code === d.defaultLanguage ? " (default)" : "")).join(", ")],
-        ["Answers first", d.routing === "BOT" ? "Bot" : "AI Agent"],
-        ["Idle chats end after", expiryText(d)],
-        ["Feedback on replies", yes(d.feedback)],
-      ]} />
-      {d.routing === "BOT" ? (
-        <Card title="Skills" step={2} rows={[
-          ["Skills", d.skills.length ? d.skills.map((s) => s.name + (s.enabled ? "" : " (off)")).join(", ") : "None added"],
-        ]} />
+      <div className="rview">
+        <span className="muted">View</span>
+        <div className="seg" role="group" aria-label="Review layout">
+          <button type="button" aria-pressed={view === "card"} onClick={() => setView("card")}>Cards</button>
+          <button type="button" aria-pressed={view === "table"} onClick={() => setView("table")}>Table</button>
+        </div>
+      </div>
+
+      {view === "card" ? (
+        sections.map((s) => <Card key={s.title} {...s} />)
       ) : (
-        <Card title="AI agent" step={2} rows={[
-          ["Agent", agent?.name ?? "None selected"],
-        ]} />
+        <div className="rsum rtable">
+          <table>
+            <thead>
+              <tr><th>Section</th><th>Setting</th><th>Value</th><th aria-label="Edit" /></tr>
+            </thead>
+            <tbody>
+              {sections.map((s) =>
+                s.rows.map(([k, v], i) => (
+                  <tr key={s.title + k} className={i === 0 ? "first" : undefined}>
+                    {i === 0 && <th scope="rowgroup" rowSpan={s.rows.length}>{s.title}</th>}
+                    <td className="k">{k}</td>
+                    <td>{v === "" || v == null ? <span className="muted">Not set</span> : v}</td>
+                    {i === 0 && (
+                      <td rowSpan={s.rows.length} className="act">
+                        <button type="button" className="link" onClick={() => go(s.step)}>Edit</button>
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
-      <Card title="Live agent" step={3} rows={[
-        ["Available", hoursSummary(d.lh.hours)],
-        ["Timezone", tzLabel(d.lh.timezone)],
-        ["Waits up to", `${d.lh.waitMin} min`],
-        ["Live chat length", `${d.lh.modeMin} min`],
-        ["Join / leave messages", `${d.lh.joinMsg ? "Join on" : "Join off"} · ${d.lh.leaveMsg ? "Leave on" : "Leave off"}`],
-      ]} />
-      <Card title="Plan, storage & advanced" step={4} rows={[
-        ["Subscription", d.chargebeeId],
-        ["Storage", storage?.name ?? ""],
-        ["CX base URL", d.cxBaseUrl],
-        ["Legacy bot", d.legacyId || d.legacyName ? `${d.legacyName} (${d.legacyId})` : "None"],
-        ["LG templates", d.lg.trim() ? "Added" : "None"],
-      ]} />
     </>
   );
 }
