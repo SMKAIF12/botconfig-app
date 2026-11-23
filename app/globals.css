@@ -235,7 +235,16 @@ textarea.inp{min-height:110px;resize:vertical;font-family:ui-monospace,Consolas,
 .banner ul{margin-top:6px;padding-left:18px;font-size:13px}
 .banner li{margin:2px 0}
 .banner li button{background:none;border:0;padding:0;color:inherit;text-decoration:underline;cursor:pointer;font-size:13px;text-align:left}
-.rsum{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.rsum{flex:none;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.banner{flex:none}
+.rsum.changes .cnt-pill{font-size:12px;padding:1px 8px;border-radius:999px;background:var(--coral-soft);color:var(--coral-text)}
+.chg-empty{padding:14px 16px;font-size:13px;color:var(--muted)}
+.chg{list-style:none;margin:0;padding:6px 16px;font-size:13px}
+.chg li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.chg li:last-child{border-bottom:0}
+.chg .k{color:var(--muted);min-width:110px}
+.chg .from{text-decoration:line-through;color:var(--muted);overflow-wrap:anywhere}
+.chg .to{font-weight:500;overflow-wrap:anywhere}
 .rsum header{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--subtle);border-bottom:1px solid var(--line)}
 .rsum header b{font-weight:500;flex:1}
 .rsum dl{display:grid;grid-template-columns:minmax(110px,160px) 1fr;gap:8px 16px;padding:14px 16px;font-size:13px}
